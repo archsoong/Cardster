@@ -16,6 +16,72 @@ const clock = new THREE.Clock()
 const raycaster = new THREE.Raycaster()
 
 /**
+ * Loader
+ */
+const loadingBarElement = document.querySelector('.loading-bar')
+const loadingManager = new THREE.LoadingManager(
+    // Loaded
+    () =>
+    {
+        // Wait a little
+        window.setTimeout(() =>
+        {
+            // Animate overlay
+            const timeline = gsap.timeline({ yoyo: true });
+
+            timeline
+            .to(overlayMaterial.uniforms.uAlpha, { duration: 3, value: 0, delay: 1 })
+            .add( function() { scene.remove(overlay )} )
+            //gsap.to(overlayMaterial.uniforms.uAlpha, { duration: 3, value: 0, delay: 1 })
+            
+
+            // Update loadingBarElement
+            loadingBarElement.classList.add('ended')
+            loadingBarElement.style.transform = ''
+        }, 500)
+    },
+
+    // Progress
+    (itemUrl, itemsLoaded, itemsTotal) =>
+    {
+        // Calculate the progress and update the loadingBarElement
+        const progressRatio = itemsLoaded / itemsTotal
+        loadingBarElement.style.transform = `scaleX(${progressRatio})`
+    }
+)
+
+/**
+ * Overlay
+ */
+const overlayGeometry = new THREE.PlaneGeometry(2, 2, 1, 1)
+const overlayMaterial = new THREE.ShaderMaterial({
+    // wireframe: true,
+    transparent: true,
+    uniforms:
+    {
+        uAlpha: { value: 1 }
+    },
+    vertexShader: `
+        void main()
+        {   
+            gl_Position = vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: `
+        uniform float uAlpha;
+
+        void main()
+        {
+            gl_FragColor = vec4(0.0, 0.0, 0.0, uAlpha);
+        }
+    `
+})
+
+const overlay = new THREE.Mesh(overlayGeometry, overlayMaterial)
+//overlay.position.set(6.0,6.0,6.0)
+scene.add(overlay)
+
+/**
  * Sizes
  */
 
@@ -50,29 +116,57 @@ const mouse = new THREE.Vector2()
 
 /**
  * Audios
+ * Sound Effect from <a href="https://pixabay.com/sound-effects/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=48088">Pixabay</a>
+ * Sound Effect by <a href="https://pixabay.com/users/u_ss015dykrt-26759154/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=146292">u_ss015dykrt</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=146292">Pixabay</a>
  */
 const listener = new THREE.AudioListener()
 camera.add(listener)
 
-const audioLoader = new THREE.AudioLoader()
-const bgm = new THREE.Audio(listener)
 
-audioLoader.load('...sound/bgm.mp3',function(buffer){
+const audioLoader = new THREE.AudioLoader(loadingManager)
+const mixcard = new THREE.Audio( listener )
+const flipcard = new THREE.Audio( listener )
+const movecard = new THREE.Audio( listener )
+const fail = new THREE.Audio( listener )
+const success = new THREE.Audio( listener )
 
-})
+// load a sound and set it as the Audio object's buffer
+audioLoader.load( './sound/mixcard.mp3', function( buffer ) {
+	mixcard.setBuffer( buffer );
+	mixcard.setVolume( 0.3 );
+});
 
-audioLoader.load
+audioLoader.load( './sound/flipcard.mp3', function( buffer ) {
+	flipcard.setBuffer( buffer );
+	flipcard.setVolume( 0.5 );
+});
+
+audioLoader.load( './sound/movecard.mp3', function( buffer ) {
+	movecard.setBuffer( buffer );
+	movecard.setVolume( 0.1 );
+});
+
+audioLoader.load( './sound/fail.mp3', function( buffer ) {
+	fail.setBuffer( buffer );
+	fail.setVolume( 0.7 );
+});
+
+audioLoader.load( './sound/success.mp3', function( buffer ) {
+	success.setBuffer( buffer );
+	success.setVolume( 0.5 );
+});
 
 /**
  * Textures
  */
-const textureLoader = new THREE.TextureLoader()
+const textureLoader = new THREE.TextureLoader(loadingManager)
 
 const sceneForestTexture = textureLoader.load('./textures/scene/wood.jpg')
 const scenePlainTexture = textureLoader.load('./textures/scene/wood.jpg')
 
 const cardBackTexture = textureLoader.load('./textures/card/card_bg.jpg')
 const cardAlphaTexture = textureLoader.load('./textures/card/card_alpha.jpg')
+const startGameBoardTexture = textureLoader.load('./textures/card/startm.jpg')
 
 const cardsTexture = []
 cardsTexture.push(textureLoader.load('./textures/card/card_1.jpg'))
@@ -93,9 +187,36 @@ cardsTexture.push(textureLoader.load('./textures/card/card_15.jpg'))
 
 cardsTexture.forEach((cardTexture) => cardTexture.colorSpace = THREE.SRGBColorSpace);
 
+startGameBoardTexture.colorSpace = THREE.SRGBColorSpace
 cardBackTexture.colorSpace = THREE.SRGBColorSpace
 sceneForestTexture.colorSpace = THREE.SRGBColorSpace
 scenePlainTexture.colorSpace = THREE.SRGBColorSpace
+
+/**
+ * UI 
+ */
+
+const startGameBoardGeometric = new THREE.PlaneGeometry(12, 8)
+const startGameBoardMaterial = new THREE.MeshBasicMaterial()
+startGameBoardMaterial.map = startGameBoardTexture
+
+const startGameBoard = new THREE.Mesh(startGameBoardGeometric, startGameBoardMaterial)
+
+const gameBoard = gui.addFolder("Start Game Board")
+
+startGameBoard.position.z = 4
+startGameBoard.position.y = -2
+startGameBoard.rotation.x = 0.35
+
+gameBoard.add(startGameBoard.position,'x').min(-10.0).max(10.0).step(0.01)
+gameBoard.add(startGameBoard.position,'y').min(-10.0).max(10.0).step(0.01)
+gameBoard.add(startGameBoard.position,'z').min(-10.0).max(10.0).step(0.01)
+
+gameBoard.add(startGameBoard.rotation,'x').min(-10.0).max(10.0).step(0.01)
+gameBoard.add(startGameBoard.rotation,'y').min(-10.0).max(10.0).step(0.01)
+gameBoard.add(startGameBoard.rotation,'z').min(-10.0).max(10.0).step(0.01)
+
+scene.add(startGameBoard)
 
 /**
  * Lights
@@ -184,10 +305,11 @@ for (let i = 0; i < rowSize; i++) {
     }
 }
 
-ShuffleCards()
+let isCardShuffled = false
 
 function ShuffleCards()
 {
+    mixcard.play()
     const tempCards = []
 
     while(cards.length)
@@ -214,6 +336,8 @@ function ShuffleCards()
             cards[index].userData.ori_position.y = y
         }
     }
+
+    isCardShuffled = true
 }
 
 const SelectedCardPositionGUI = gui.addFolder("Selected Card Position")
@@ -246,6 +370,14 @@ window.addEventListener('mousemove', (event) =>
 
 window.addEventListener('click', () =>
 {
+    if(!isCardShuffled)
+    {   
+        scene.remove(startGameBoard)
+        ShuffleCards()
+        return
+    }
+
+
     raycaster.setFromCamera(mouse, camera)
     
     const intersects = raycaster.intersectObjects(cards)
@@ -269,12 +401,6 @@ window.addEventListener('click', () =>
             SelectedCardGoToHand()
             selectedCard = null
         }
-
-        // timeline
-        //     .to(currentIntersect.object.parent.position, { duration: 0.3, z: spacingX/2 })
-        //     .to(currentIntersect.object.parent.rotation, { duration: 0.3, y: flip})
-        //     .to(currentIntersect.object.parent.position, { duration: 0.3, z: 0.05 })
-
     }
 
     currentIntersect = null
@@ -285,6 +411,7 @@ function SelectedCardMove()
     const timeline = gsap.timeline({ yoyo: true });
 
     timeline
+        .add( function() { movecard.play() } )
         .to(selectedCard.position, { 
             duration: 0.3,
             x: SelectedCardPosition.x,
@@ -292,10 +419,12 @@ function SelectedCardMove()
             z: SelectedCardPosition.z
         })
         .to(selectedCard.rotation, { duration: 0.3, x: SelectedCardRotation})
+        .add( function() { flipcard.play() } )
         .to(selectedCard.rotation, { duration: 0.3, y: flip})
 }
 
 let handIndex = 0
+let matchedCount = 0
 let cardsOnHand = []
 
 function SelectedCardGoToHand()
@@ -312,9 +441,9 @@ function SelectedCardGoToHand()
     {
         handIndex = index
     }
-    
 
     timeline
+        .add( function() { movecard.play() } )
         .to(selectedCard.position, { 
             duration: 0.3,
             x: PositionArray[handIndex].x,
@@ -345,11 +474,13 @@ function MatchCard()
         cardsOnHand[0].userData.type == cardsOnHand[2].userData.type)
     {
         matchSuccess()
+        success.play()
         console.log('Match Success')
     }
     else
     {
         matchFail()
+        fail.play()
         console.log('Match Fail')
     }
 }
@@ -357,6 +488,7 @@ function MatchCard()
 function matchSuccess()
 {
     ReturnCardsToBoardUp()
+    CheckIfWin()
 }
 
 function matchFail()
@@ -369,6 +501,8 @@ function ReturnCardsToBoard()
     console.log('Return to board called')
 
     const timeline = gsap.timeline({ yoyo: true });
+
+    movecard.play()
 
     timeline
     .to(cardsOnHand[0].rotation, { 
@@ -383,14 +517,17 @@ function ReturnCardsToBoard()
         x: cardsOnHand[2].userData.ori_rotation.x,
         y: cardsOnHand[2].userData.ori_rotation.y,
         z: cardsOnHand[2].userData.ori_rotation.z})
+    .add( function() { movecard.play() } )
     .to(cardsOnHand[0].position, { 
         x: cardsOnHand[0].userData.ori_position.x,
         y: cardsOnHand[0].userData.ori_position.y,
         z: cardsOnHand[0].userData.ori_position.z})
+    .add( function() { movecard.play() } )
     .to(cardsOnHand[1].position, { 
         x: cardsOnHand[1].userData.ori_position.x,
         y: cardsOnHand[1].userData.ori_position.y,
         z: cardsOnHand[1].userData.ori_position.z})
+    .add( function() { movecard.play() } )
     .to(cardsOnHand[2].position, { 
         x: cardsOnHand[2].userData.ori_position.x,
         y: cardsOnHand[2].userData.ori_position.y,
@@ -406,6 +543,8 @@ function ReturnCardsToBoardUp()
 
     const timeline = gsap.timeline({ yoyo: true });
 
+    movecard.play()
+
     timeline
     .to(cardsOnHand[0].rotation, { 
         x: cardsOnHand[0].userData.ori_rotation.x,
@@ -419,21 +558,34 @@ function ReturnCardsToBoardUp()
         x: cardsOnHand[2].userData.ori_rotation.x,
         y: Math.PI*2,
         z: cardsOnHand[2].userData.ori_rotation.z})
+    .add( function() { movecard.play() } )
     .to(cardsOnHand[0].position, { 
         x: cardsOnHand[0].userData.ori_position.x,
         y: cardsOnHand[0].userData.ori_position.y,
         z: cardsOnHand[0].userData.ori_position.z})
+    .add( function() { movecard.play() } )
     .to(cardsOnHand[1].position, { 
         x: cardsOnHand[1].userData.ori_position.x,
         y: cardsOnHand[1].userData.ori_position.y,
         z: cardsOnHand[1].userData.ori_position.z})
+    .add( function() { movecard.play() } )
     .to(cardsOnHand[2].position, { 
         x: cardsOnHand[2].userData.ori_position.x,
         y: cardsOnHand[2].userData.ori_position.y,
         z: cardsOnHand[2].userData.ori_position.z})
 
+    matchedCount += 3
     cardsOnHand = []
     handIndex = 0
+}
+
+function CheckIfWin()
+{
+    if(matchedCount >= 15 )
+    {
+        success.play()
+        
+    }
 }
 
 // Controls
