@@ -630,3 +630,5 @@ function showPlayAgain() {
 }
 
 tick()
+
+gui.hide()
