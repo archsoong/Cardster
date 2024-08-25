@@ -11,6 +11,7 @@ const gui = new GUI()
 const canvas = document.querySelector('canvas.webgl')
 
 const scene = new THREE.Scene()
+scene.background = new THREE.Color(0.85, 0.85, 0.85)
 
 const clock = new THREE.Clock()
 const raycaster = new THREE.Raycaster()
@@ -21,19 +22,17 @@ const raycaster = new THREE.Raycaster()
 const loadingBarElement = document.querySelector('.loading-bar')
 const loadingManager = new THREE.LoadingManager(
     // Loaded
-    () =>
-    {
+    () => {
         // Wait a little
-        window.setTimeout(() =>
-        {
+        window.setTimeout(() => {
             // Animate overlay
             const timeline = gsap.timeline({ yoyo: true });
 
             timeline
-            .to(overlayMaterial.uniforms.uAlpha, { duration: 3, value: 0, delay: 1 })
-            .add( function() { scene.remove(overlay )} )
+                .to(overlayMaterial.uniforms.uAlpha, { duration: 3, value: 0, delay: 1 })
+                .add(function () { scene.remove(overlay) })
             //gsap.to(overlayMaterial.uniforms.uAlpha, { duration: 3, value: 0, delay: 1 })
-            
+
 
             // Update loadingBarElement
             loadingBarElement.classList.add('ended')
@@ -42,8 +41,7 @@ const loadingManager = new THREE.LoadingManager(
     },
 
     // Progress
-    (itemUrl, itemsLoaded, itemsTotal) =>
-    {
+    (itemUrl, itemsLoaded, itemsTotal) => {
         // Calculate the progress and update the loadingBarElement
         const progressRatio = itemsLoaded / itemsTotal
         loadingBarElement.style.transform = `scaleX(${progressRatio})`
@@ -105,12 +103,12 @@ camera.rotation.x = 0.35
 scene.add(camera)
 
 const cameraGUI = gui.addFolder("Camera")
-cameraGUI.add(camera.position,'x').min(0).max(10).step(0.1)
-cameraGUI.add(camera.position,'y').min(-10).max(10).step(0.1)
-cameraGUI.add(camera.position,'z').min(0).max(10).step(0.1)
-cameraGUI.add(camera.rotation,'x').min(0).max(10).step(0.1)
-cameraGUI.add(camera.rotation,'y').min(-10).max(10).step(0.1)
-cameraGUI.add(camera.rotation,'z').min(0).max(10).step(0.1)
+cameraGUI.add(camera.position, 'x').min(0).max(10).step(0.1)
+cameraGUI.add(camera.position, 'y').min(-10).max(10).step(0.1)
+cameraGUI.add(camera.position, 'z').min(0).max(10).step(0.1)
+cameraGUI.add(camera.rotation, 'x').min(0).max(10).step(0.1)
+cameraGUI.add(camera.rotation, 'y').min(-10).max(10).step(0.1)
+cameraGUI.add(camera.rotation, 'z').min(0).max(10).step(0.1)
 
 const mouse = new THREE.Vector2()
 
@@ -124,36 +122,42 @@ camera.add(listener)
 
 
 const audioLoader = new THREE.AudioLoader(loadingManager)
-const mixcard = new THREE.Audio( listener )
-const flipcard = new THREE.Audio( listener )
-const movecard = new THREE.Audio( listener )
-const fail = new THREE.Audio( listener )
-const success = new THREE.Audio( listener )
+const mixcard = new THREE.Audio(listener)
+const flipcard = new THREE.Audio(listener)
+const movecard = new THREE.Audio(listener)
+const fail = new THREE.Audio(listener)
+const success = new THREE.Audio(listener)
+const victory = new THREE.Audio(listener)
 
 // load a sound and set it as the Audio object's buffer
-audioLoader.load( './sound/mixcard.mp3', function( buffer ) {
-	mixcard.setBuffer( buffer );
-	mixcard.setVolume( 0.3 );
+audioLoader.load('./sound/mixcard.mp3', function (buffer) {
+    mixcard.setBuffer(buffer);
+    mixcard.setVolume(0.3);
 });
 
-audioLoader.load( './sound/flipcard.mp3', function( buffer ) {
-	flipcard.setBuffer( buffer );
-	flipcard.setVolume( 0.5 );
+audioLoader.load('./sound/flipcard.mp3', function (buffer) {
+    flipcard.setBuffer(buffer);
+    flipcard.setVolume(0.5);
 });
 
-audioLoader.load( './sound/movecard.mp3', function( buffer ) {
-	movecard.setBuffer( buffer );
-	movecard.setVolume( 0.1 );
+audioLoader.load('./sound/movecard.mp3', function (buffer) {
+    movecard.setBuffer(buffer);
+    movecard.setVolume(0.1);
 });
 
-audioLoader.load( './sound/fail.mp3', function( buffer ) {
-	fail.setBuffer( buffer );
-	fail.setVolume( 0.7 );
+audioLoader.load('./sound/fail.mp3', function (buffer) {
+    fail.setBuffer(buffer);
+    fail.setVolume(0.7);
 });
 
-audioLoader.load( './sound/success.mp3', function( buffer ) {
-	success.setBuffer( buffer );
-	success.setVolume( 0.5 );
+audioLoader.load('./sound/success.mp3', function (buffer) {
+    success.setBuffer(buffer);
+    success.setVolume(0.5);
+});
+
+audioLoader.load('./sound/victory.mp3', function (buffer) {
+    victory.setBuffer(buffer);
+    victory.setVolume(0.1);
 });
 
 /**
@@ -166,7 +170,8 @@ const scenePlainTexture = textureLoader.load('./textures/scene/wood.jpg')
 
 const cardBackTexture = textureLoader.load('./textures/card/card_bg.jpg')
 const cardAlphaTexture = textureLoader.load('./textures/card/card_alpha.jpg')
-const startGameBoardTexture = textureLoader.load('./textures/card/startm.jpg')
+const startGameBoardTexture = textureLoader.load('./textures/card/start.jpg')
+const endGameBoardTexture = textureLoader.load('./textures/card/End.jpg')
 
 const cardsTexture = []
 cardsTexture.push(textureLoader.load('./textures/card/card_1.jpg'))
@@ -188,6 +193,7 @@ cardsTexture.push(textureLoader.load('./textures/card/card_15.jpg'))
 cardsTexture.forEach((cardTexture) => cardTexture.colorSpace = THREE.SRGBColorSpace);
 
 startGameBoardTexture.colorSpace = THREE.SRGBColorSpace
+endGameBoardTexture.colorSpace = THREE.SRGBColorSpace
 cardBackTexture.colorSpace = THREE.SRGBColorSpace
 sceneForestTexture.colorSpace = THREE.SRGBColorSpace
 scenePlainTexture.colorSpace = THREE.SRGBColorSpace
@@ -196,25 +202,23 @@ scenePlainTexture.colorSpace = THREE.SRGBColorSpace
  * UI 
  */
 
-const startGameBoardGeometric = new THREE.PlaneGeometry(12, 8)
+const gameBoardGeometric = new THREE.PlaneGeometry(12, 9)
 const startGameBoardMaterial = new THREE.MeshBasicMaterial()
 startGameBoardMaterial.map = startGameBoardTexture
+const startGameBoard = new THREE.Mesh(gameBoardGeometric, startGameBoardMaterial)
 
-const startGameBoard = new THREE.Mesh(startGameBoardGeometric, startGameBoardMaterial)
-
-const gameBoard = gui.addFolder("Start Game Board")
+const endGameBoardMaterial = new THREE.MeshBasicMaterial()
+endGameBoardMaterial.map = endGameBoardTexture
+const endGameBoard = new THREE.Mesh(gameBoardGeometric, endGameBoardMaterial)
 
 startGameBoard.position.z = 4
 startGameBoard.position.y = -2
 startGameBoard.rotation.x = 0.35
 
-gameBoard.add(startGameBoard.position,'x').min(-10.0).max(10.0).step(0.01)
-gameBoard.add(startGameBoard.position,'y').min(-10.0).max(10.0).step(0.01)
-gameBoard.add(startGameBoard.position,'z').min(-10.0).max(10.0).step(0.01)
-
-gameBoard.add(startGameBoard.rotation,'x').min(-10.0).max(10.0).step(0.01)
-gameBoard.add(startGameBoard.rotation,'y').min(-10.0).max(10.0).step(0.01)
-gameBoard.add(startGameBoard.rotation,'z').min(-10.0).max(10.0).step(0.01)
+endGameBoard.position.z = 4
+endGameBoard.position.y = -2
+endGameBoard.rotation.x = 0.35
+endGameBoard.name = "endGameBoard"
 
 scene.add(startGameBoard)
 
@@ -252,12 +256,12 @@ const spacingY = cardHeight + spacing
 const flip = Math.PI * 2
 
 const PositionArray = []
-PositionArray.push(new THREE.Vector3(-spacingX, -4.5001,4.21))
-PositionArray.push(new THREE.Vector3(0.0,-4.5001,4.16))
-PositionArray.push(new THREE.Vector3(spacingX,-4.5001,4.21))
+PositionArray.push(new THREE.Vector3(-spacingX, -4.5001, 4.21))
+PositionArray.push(new THREE.Vector3(0.0, -4.5001, 4.16))
+PositionArray.push(new THREE.Vector3(spacingX, -4.5001, 4.21))
 
-const SelectedCardPosition = new THREE.Vector3(0.0,-3.4,8.21)
-const SelectedCardRotation = Math.PI/6
+const SelectedCardPosition = new THREE.Vector3(0.0, -3.4, 8.21)
+const SelectedCardRotation = Math.PI / 6
 
 let cards = []
 
@@ -266,7 +270,7 @@ const planeGeometry = new THREE.PlaneGeometry(1.6, 2.4)
 for (let i = 0; i < rowSize; i++) {
     for (let j = 0; j < colSize; j++) {
 
-        const cardTexture_no = i*5+j
+        const cardTexture_no = i * 5 + j
 
         const cardFrontMaterial = new THREE.MeshBasicMaterial()
         cardFrontMaterial.map = cardsTexture[cardTexture_no]
@@ -287,17 +291,17 @@ for (let i = 0; i < rowSize; i++) {
         card_Group.add(cardBack);
 
         card_Group.position.z = 0.05;
-        card_Group.position.x = j * spacingX - (colSize * spacingX / 2) + spacingX/2
-        card_Group.position.y = i * spacingY - (rowSize * spacingY / 2) + spacingY/2
+        card_Group.position.x = j * spacingX - (colSize * spacingX / 2) + spacingX / 2
+        card_Group.position.y = i * spacingY - (rowSize * spacingY / 2) + spacingY / 2
         card_Group.rotation.y = Math.PI
-        
-        cardFront.name = 'cardFront '+ cardTexture_no
-        cardBack.name = 'cardBack '+ cardTexture_no
-        card_Group.name = 'card '+ cardTexture_no
+
+        cardFront.name = 'cardFront ' + cardTexture_no
+        cardBack.name = 'cardBack ' + cardTexture_no
+        card_Group.name = 'card ' + cardTexture_no
 
         const type = Math.floor(cardTexture_no / 3)
         const cardData = new Card(card_Group.position.clone(), card_Group.rotation.clone(), type);
-        
+
         card_Group.userData = cardData
 
         cards.push(card_Group)
@@ -307,15 +311,13 @@ for (let i = 0; i < rowSize; i++) {
 
 let isCardShuffled = false
 
-function ShuffleCards()
-{
+function ShuffleCards() {
     mixcard.play()
     const tempCards = []
 
-    while(cards.length)
-    {
+    while (cards.length) {
         const randomIndex = Math.floor(Math.random() * cards.length)
-        const tempCard = cards.splice(randomIndex,1)
+        const tempCard = cards.splice(randomIndex, 1)
         tempCards.push(tempCard[0])
     }
     cards = tempCards
@@ -325,13 +327,12 @@ function ShuffleCards()
     const timeline = gsap.timeline({ yoyo: true });
 
     for (let i = 0; i < rowSize; i++) {
-        for (let j = 0; j < colSize; j++) 
-        {
-            const index = i*5+j
-            const x = j * spacingX - (colSize * spacingX / 2) + spacingX/2
-            const y = i * spacingY - (rowSize * spacingY / 2) + spacingY/2
+        for (let j = 0; j < colSize; j++) {
+            const index = i * 5 + j
+            const x = j * spacingX - (colSize * spacingX / 2) + spacingX / 2
+            const y = i * spacingY - (rowSize * spacingY / 2) + spacingY / 2
 
-            timeline.to(cards[index].position, { duration: 0.1, x: x, y:y })
+            timeline.to(cards[index].position, { duration: 0.1, x: x, y: y })
             cards[index].userData.ori_position.x = x
             cards[index].userData.ori_position.y = y
         }
@@ -341,12 +342,11 @@ function ShuffleCards()
 }
 
 const SelectedCardPositionGUI = gui.addFolder("Selected Card Position")
-SelectedCardPositionGUI.add(SelectedCardPosition,'x').min(0).max(10).step(0.1)
-SelectedCardPositionGUI.add(SelectedCardPosition,'y').min(-10).max(10).step(0.1)
-SelectedCardPositionGUI.add(SelectedCardPosition,'z').min(0).max(10).step(0.1)
+SelectedCardPositionGUI.add(SelectedCardPosition, 'x').min(0).max(10).step(0.1)
+SelectedCardPositionGUI.add(SelectedCardPosition, 'y').min(-10).max(10).step(0.1)
+SelectedCardPositionGUI.add(SelectedCardPosition, 'z').min(0).max(10).step(0.1)
 
-window.addEventListener('resize', () =>
-{
+window.addEventListener('resize', () => {
     // Update sizes
     sizes.width = window.innerWidth
     sizes.height = window.innerHeight
@@ -360,44 +360,40 @@ window.addEventListener('resize', () =>
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 })
 
-window.addEventListener('mousemove', (event) =>
-    {
-        mouse.x = event.clientX / sizes.width * 2 - 1
-        mouse.y = - (event.clientY / sizes.height) * 2 + 1
-    })
+window.addEventListener('mousemove', (event) => {
+    mouse.x = event.clientX / sizes.width * 2 - 1
+    mouse.y = - (event.clientY / sizes.height) * 2 + 1
+})
 
- let selectedCard = null
+let selectedCard = null
 
-window.addEventListener('click', () =>
-{
-    if(!isCardShuffled)
-    {   
+window.addEventListener('click', () => {
+    if (!isCardShuffled) {
         scene.remove(startGameBoard)
         ShuffleCards()
         return
     }
 
+    if (scene.getObjectByName('endGameBoard')) {
+        location.reload()
+    }
 
     raycaster.setFromCamera(mouse, camera)
-    
+
     const intersects = raycaster.intersectObjects(cards)
-    
-    if(intersects.length)
-    {
+
+    if (intersects.length) {
         currentIntersect = intersects[0]
     }
-    
-    if(currentIntersect)
-    {
+
+    if (currentIntersect) {
         // console.log(currentIntersect.object.parent)
 
-        if(selectedCard == null)
-        {
+        if (selectedCard == null) {
             selectedCard = currentIntersect.object.parent
             SelectedCardMove()
         }
-        else
-        {
+        else {
             SelectedCardGoToHand()
             selectedCard = null
         }
@@ -406,45 +402,41 @@ window.addEventListener('click', () =>
     currentIntersect = null
 })
 
-function SelectedCardMove()
-{
+function SelectedCardMove() {
     const timeline = gsap.timeline({ yoyo: true });
 
     timeline
-        .add( function() { movecard.play() } )
-        .to(selectedCard.position, { 
+        .add(function () { movecard.play() })
+        .to(selectedCard.position, {
             duration: 0.3,
             x: SelectedCardPosition.x,
             y: SelectedCardPosition.y,
             z: SelectedCardPosition.z
         })
-        .to(selectedCard.rotation, { duration: 0.3, x: SelectedCardRotation})
-        .add( function() { flipcard.play() } )
-        .to(selectedCard.rotation, { duration: 0.3, y: flip})
+        .to(selectedCard.rotation, { duration: 0.3, x: SelectedCardRotation })
+        .add(function () { flipcard.play() })
+        .to(selectedCard.rotation, { duration: 0.3, y: flip })
 }
 
 let handIndex = 0
 let matchedCount = 0
 let cardsOnHand = []
 
-function SelectedCardGoToHand()
-{
+function SelectedCardGoToHand() {
     const timeline = gsap.timeline({ yoyo: true })
 
     let index = cardsOnHand.findIndex(cardInHand => cardInHand === selectedCard);
-    
-    if(index == -1)
-    {
+
+    if (index == -1) {
         index = handIndex
     }
-    else
-    {
+    else {
         handIndex = index
     }
 
     timeline
-        .add( function() { movecard.play() } )
-        .to(selectedCard.position, { 
+        .add(function () { movecard.play() })
+        .to(selectedCard.position, {
             duration: 0.3,
             x: PositionArray[handIndex].x,
             y: PositionArray[handIndex].y,
@@ -452,52 +444,46 @@ function SelectedCardGoToHand()
         })
 
     cardsOnHand.push(selectedCard)
-    
-    if(index != -1)
+
+    if (index != -1)
         handIndex++
 
-    if(handIndex == 3){ MatchCard() }
+    if (handIndex == 3) { MatchCard() }
 }
 
-function MatchCard()
-{
+function MatchCard() {
     const timeline = gsap.timeline({ yoyo: true });
 
     timeline
-    .to(cardsOnHand[0].position, { y: PositionArray[0].y+0.5 })
-    .to(cardsOnHand[1].position, { y: PositionArray[1].y+0.5 })
-    .to(cardsOnHand[2].position, { y: PositionArray[2].y+0.5 })
+        .to(cardsOnHand[0].position, { y: PositionArray[0].y + 0.5 })
+        .to(cardsOnHand[1].position, { y: PositionArray[1].y + 0.5 })
+        .to(cardsOnHand[2].position, { y: PositionArray[2].y + 0.5 })
 
     console.log(cardsOnHand[0].userData.type + ' ' + cardsOnHand[1].userData.type + ' ' + cardsOnHand[2].userData.type)
 
-    if(cardsOnHand[0].userData.type == cardsOnHand[1].userData.type &&
-        cardsOnHand[0].userData.type == cardsOnHand[2].userData.type)
-    {
+    if (cardsOnHand[0].userData.type == cardsOnHand[1].userData.type &&
+        cardsOnHand[0].userData.type == cardsOnHand[2].userData.type) {
         matchSuccess()
         success.play()
         console.log('Match Success')
     }
-    else
-    {
+    else {
         matchFail()
         fail.play()
         console.log('Match Fail')
     }
 }
 
-function matchSuccess()
-{
+function matchSuccess() {
     ReturnCardsToBoardUp()
     CheckIfWin()
 }
 
-function matchFail()
-{
+function matchFail() {
     ReturnCardsToBoard()
 }
 
-function ReturnCardsToBoard()
-{
+function ReturnCardsToBoard() {
     console.log('Return to board called')
 
     const timeline = gsap.timeline({ yoyo: true });
@@ -505,40 +491,45 @@ function ReturnCardsToBoard()
     movecard.play()
 
     timeline
-    .to(cardsOnHand[0].rotation, { 
-        x: cardsOnHand[0].userData.ori_rotation.x,
-        y: cardsOnHand[0].userData.ori_rotation.y,
-        z: cardsOnHand[0].userData.ori_rotation.z})
-    .to(cardsOnHand[1].rotation, { 
-        x: cardsOnHand[1].userData.ori_rotation.x,
-        y: cardsOnHand[1].userData.ori_rotation.y,
-        z: cardsOnHand[1].userData.ori_rotation.z})
-    .to(cardsOnHand[2].rotation, { 
-        x: cardsOnHand[2].userData.ori_rotation.x,
-        y: cardsOnHand[2].userData.ori_rotation.y,
-        z: cardsOnHand[2].userData.ori_rotation.z})
-    .add( function() { movecard.play() } )
-    .to(cardsOnHand[0].position, { 
-        x: cardsOnHand[0].userData.ori_position.x,
-        y: cardsOnHand[0].userData.ori_position.y,
-        z: cardsOnHand[0].userData.ori_position.z})
-    .add( function() { movecard.play() } )
-    .to(cardsOnHand[1].position, { 
-        x: cardsOnHand[1].userData.ori_position.x,
-        y: cardsOnHand[1].userData.ori_position.y,
-        z: cardsOnHand[1].userData.ori_position.z})
-    .add( function() { movecard.play() } )
-    .to(cardsOnHand[2].position, { 
-        x: cardsOnHand[2].userData.ori_position.x,
-        y: cardsOnHand[2].userData.ori_position.y,
-        z: cardsOnHand[2].userData.ori_position.z})
+        .to(cardsOnHand[0].rotation, {
+            x: cardsOnHand[0].userData.ori_rotation.x,
+            y: cardsOnHand[0].userData.ori_rotation.y,
+            z: cardsOnHand[0].userData.ori_rotation.z
+        })
+        .to(cardsOnHand[1].rotation, {
+            x: cardsOnHand[1].userData.ori_rotation.x,
+            y: cardsOnHand[1].userData.ori_rotation.y,
+            z: cardsOnHand[1].userData.ori_rotation.z
+        })
+        .to(cardsOnHand[2].rotation, {
+            x: cardsOnHand[2].userData.ori_rotation.x,
+            y: cardsOnHand[2].userData.ori_rotation.y,
+            z: cardsOnHand[2].userData.ori_rotation.z
+        })
+        .add(function () { movecard.play() })
+        .to(cardsOnHand[0].position, {
+            x: cardsOnHand[0].userData.ori_position.x,
+            y: cardsOnHand[0].userData.ori_position.y,
+            z: cardsOnHand[0].userData.ori_position.z
+        })
+        .add(function () { movecard.play() })
+        .to(cardsOnHand[1].position, {
+            x: cardsOnHand[1].userData.ori_position.x,
+            y: cardsOnHand[1].userData.ori_position.y,
+            z: cardsOnHand[1].userData.ori_position.z
+        })
+        .add(function () { movecard.play() })
+        .to(cardsOnHand[2].position, {
+            x: cardsOnHand[2].userData.ori_position.x,
+            y: cardsOnHand[2].userData.ori_position.y,
+            z: cardsOnHand[2].userData.ori_position.z
+        })
 
     cardsOnHand = []
     handIndex = 0
 }
 
-function ReturnCardsToBoardUp()
-{
+function ReturnCardsToBoardUp() {
     console.log('Return to board facing up called')
 
     const timeline = gsap.timeline({ yoyo: true });
@@ -546,45 +537,51 @@ function ReturnCardsToBoardUp()
     movecard.play()
 
     timeline
-    .to(cardsOnHand[0].rotation, { 
-        x: cardsOnHand[0].userData.ori_rotation.x,
-        y: Math.PI*2,
-        z: cardsOnHand[0].userData.ori_rotation.z})
-    .to(cardsOnHand[1].rotation, { 
-        x: cardsOnHand[1].userData.ori_rotation.x,
-        y: Math.PI*2,
-        z: cardsOnHand[1].userData.ori_rotation.z})
-    .to(cardsOnHand[2].rotation, { 
-        x: cardsOnHand[2].userData.ori_rotation.x,
-        y: Math.PI*2,
-        z: cardsOnHand[2].userData.ori_rotation.z})
-    .add( function() { movecard.play() } )
-    .to(cardsOnHand[0].position, { 
-        x: cardsOnHand[0].userData.ori_position.x,
-        y: cardsOnHand[0].userData.ori_position.y,
-        z: cardsOnHand[0].userData.ori_position.z})
-    .add( function() { movecard.play() } )
-    .to(cardsOnHand[1].position, { 
-        x: cardsOnHand[1].userData.ori_position.x,
-        y: cardsOnHand[1].userData.ori_position.y,
-        z: cardsOnHand[1].userData.ori_position.z})
-    .add( function() { movecard.play() } )
-    .to(cardsOnHand[2].position, { 
-        x: cardsOnHand[2].userData.ori_position.x,
-        y: cardsOnHand[2].userData.ori_position.y,
-        z: cardsOnHand[2].userData.ori_position.z})
+        .to(cardsOnHand[0].rotation, {
+            x: cardsOnHand[0].userData.ori_rotation.x,
+            y: Math.PI * 2,
+            z: cardsOnHand[0].userData.ori_rotation.z
+        })
+        .to(cardsOnHand[1].rotation, {
+            x: cardsOnHand[1].userData.ori_rotation.x,
+            y: Math.PI * 2,
+            z: cardsOnHand[1].userData.ori_rotation.z
+        })
+        .to(cardsOnHand[2].rotation, {
+            x: cardsOnHand[2].userData.ori_rotation.x,
+            y: Math.PI * 2,
+            z: cardsOnHand[2].userData.ori_rotation.z
+        })
+        .add(function () { movecard.play() })
+        .to(cardsOnHand[0].position, {
+            x: cardsOnHand[0].userData.ori_position.x,
+            y: cardsOnHand[0].userData.ori_position.y,
+            z: cardsOnHand[0].userData.ori_position.z
+        })
+        .add(function () { movecard.play() })
+        .to(cardsOnHand[1].position, {
+            x: cardsOnHand[1].userData.ori_position.x,
+            y: cardsOnHand[1].userData.ori_position.y,
+            z: cardsOnHand[1].userData.ori_position.z
+        })
+        .add(function () { movecard.play() })
+        .to(cardsOnHand[2].position, {
+            x: cardsOnHand[2].userData.ori_position.x,
+            y: cardsOnHand[2].userData.ori_position.y,
+            z: cardsOnHand[2].userData.ori_position.z
+        })
 
     matchedCount += 3
     cardsOnHand = []
     handIndex = 0
 }
 
-function CheckIfWin()
-{
-    if(matchedCount >= 15 )
-    {
+let gameover = false
+
+function CheckIfWin() {
+    if (matchedCount >= 15) {
         success.play()
-        
+        gameover = true
     }
 }
 
@@ -608,11 +605,12 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
  */
 let currentIntersect = null
 
-const tick = () =>
-{
+const tick = () => {
     const elapsedTime = clock.getElapsedTime()
 
-
+    if (gameover == true) {
+        showPlayAgain()
+    }
     // Update controls
     // controls.update()
 
@@ -621,6 +619,14 @@ const tick = () =>
 
     // Call tick again on the next frame
     window.requestAnimationFrame(tick)
+}
+
+function showPlayAgain() {
+    console.log("end game board")
+    setTimeout(function () {
+        scene.add(endGameBoard)
+        victory.play()
+    }, 3000);
 }
 
 tick()
